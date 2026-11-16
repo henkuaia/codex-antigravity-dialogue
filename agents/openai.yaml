@@ -1,0 +1,6 @@
+interface:
+  display_name: "Codex-Antigravity Dialogue"
+  short_description: "Two-way Desktop handoffs and verified agent replies"
+  default_prompt: "Use $codex-antigravity-dialogue to inspect the current project's Desktop bridge status without sending messages or changing configuration."
+policy:
+  allow_implicit_invocation: true
