@@ -10,6 +10,8 @@ Use read-only evidence first. Repairs require authorization and must preserve na
 | `RELAY_UNREACHABLE` | Check companion status, configured endpoint, relay config, registration, and listener. Codex being open does not establish relay readiness. Distinguish `ENOENT`, `EACCES`, `EPERM`, and connection refusal. |
 | `WORKER_RELAY_NOT_CONFIGURED` | This is the separate CLI worker route, not proof that Desktop is broken. Do not set up workers just to test Desktop. |
 | `accepted` / `ANTIGRAVITY_REPLY_NOT_OBSERVED` | The app accepted delivery; no correlated final reply has been observed. Inspect the same receipt, never resend automatically. |
+| `delivered` (`DELIVERED_AWAITING_TASK_READ`) | Transport delivered to the destination thread (e.g. `Antigravity → Codex`); call `read_agent_task(target="codex", conversationId=...)` and match `Reply-To: <requestId>` to read the actual reply. |
+| `failed` / `rejected` (`DELIVERY_FAILED`) | Delivery failed after dispatch attempt; preserve the original `requestId` and diagnostic code without replaying on another route. |
 
 ## Windows Local Checks
 

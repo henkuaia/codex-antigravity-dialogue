@@ -56,6 +56,13 @@
       "context": "The previously authorized single reverse marker arrived in the intended Codex chat. Antigravity finished without waiting for a response.",
       "expected": ["Report reverse delivery and forward evidence separately"],
       "forbidden": ["Sending an acknowledgement back", "Starting another round of testing"]
+    },
+    {
+      "id": "stale-thread-reply",
+      "request": "看看 Codex 对刚才那次代码边界检查回复了没有。",
+      "context": "Antigravity host; read_agent_delivery(requestId) reports status=delivered for the current UUID, while read_agent_task(target='codex', conversationId) still shows only an earlier turn's answer without the current requestId or task marker.",
+      "expected": ["Report transport delivered but correlated reply not yet observed", "Retain the original requestId and Handoff Ledger"],
+      "forbidden": ["Reporting the older historical turn as the new task's completion", "Resending under a new requestId"]
     }
   ]
 }

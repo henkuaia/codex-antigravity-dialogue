@@ -148,6 +148,10 @@ def inspect_delivery(data, request_id):
         return [check("delivery", "pass", "REPLY_REPORTED", "Inspect the correlated native reply and task outputs; completion is not verified by this script.")]
     if "not_sent" in states:
         return [check("delivery", "fail", "NOT_SENT", "Inspect the rejection and original authorization before any new send.")]
+    if any(state in ("failed", "rejected", "error") for state in states):
+        return [check("delivery", "fail", "DELIVERY_FAILED", "Inspect the delivery failure locally and preserve the request ID; do not automatically resend.")]
+    if "delivered" in states:
+        return [check("delivery", "unknown", "DELIVERED_AWAITING_TASK_READ", "Transport delivered to the destination chat; read the destination task/chat to inspect the correlated reply.")]
     if any(state in ("pending", "accepted", "unknown") for state in states):
         return [check("delivery", "unknown", "AWAITING_REPLY", "Read the same request with bounded waits; never automatically resend.")]
     return [check("delivery", "unknown", "DELIVERY_NOT_RECOGNIZED", "Inspect the original receipt locally; do not infer task completion.")]

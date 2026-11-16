@@ -138,6 +138,16 @@ class DoctorTests(unittest.TestCase):
         self.assertEqual(doctor.inspect_delivery({"requestId": "a", "deliveryState": "not_sent"}, "a")[0]["state"], "fail")
         self.assertEqual(doctor.inspect_delivery({"code": "ANTIGRAVITY_REPLY_NOT_OBSERVED"}, "a")[0]["state"], "unknown")
 
+    def test_delivered_requires_destination_task_read_and_failed_is_reported(self):
+        delivered = doctor.inspect_delivery({"requestId": "a", "status": "delivered"}, "a")[0]
+        self.assertEqual(delivered["state"], "unknown")
+        self.assertEqual(delivered["code"], "DELIVERED_AWAITING_TASK_READ")
+        for fail_state in ("failed", "rejected", "error"):
+            with self.subTest(fail_state=fail_state):
+                failed = doctor.inspect_delivery({"requestId": "a", "status": fail_state}, "a")[0]
+                self.assertEqual(failed["state"], "fail")
+                self.assertEqual(failed["code"], "DELIVERY_FAILED")
+
     def test_cli_is_read_only_and_never_claims_task_completion(self):
         path = self.root / "status.json"
         payload = json.dumps({"desktop": {"available": True}})

@@ -9,7 +9,7 @@ Skill release: **0.1.0**. This is the first packaged release, not a claim of uni
 | Stock upstream bridge 2.3.2 or other versions | Inspect installed schemas first | Not established by that local success. |
 | Other operating systems and Desktop builds | Instructions may apply | No live integration verification recorded; exact app builds from the historical test were not retained. |
 | Offline diagnostic helper | Python 3.11+, standard library | Automated fixture tests; no network or dispatch. |
-| Agent behavior under these instructions | Evaluation scenarios supplied | Scenarios are not a completed model evaluation or proof of instruction following. |
+| Agent behavior under these instructions | 9 evaluation scenarios supplied | Scenarios are not a completed model evaluation or proof of instruction following. |
 
 Historical local fixes covered project metadata compatibility, Codex-only account routing, entry paths, and relay registration. They are not bundled here. Do not promise that installing this skill reproduces those changes, and never bypass native verification to imitate them.
 
