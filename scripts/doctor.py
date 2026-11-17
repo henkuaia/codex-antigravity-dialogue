@@ -18,6 +18,14 @@ DIAGNOSTICS = {
     "ANTIGRAVITY_SENDER_UNVERIFIED": "Check native sender and project identity; do not bypass verification.",
     "BRIDGE_ACCOUNT_UNVERIFIED": "Check the required account for the Codex target; do not install another provider.",
     "BRIDGE_OPERATION_FAILED": "Check whether the sender workspace matches a saved local Codex project; do not spoof cwd.",
+    "ANTIGRAVITY_TARGET_CWD_REQUIRED": "Pass the discovered target projectCwd explicitly as cwd on Codex reads and sends.",
+    "ANTIGRAVITY_TARGET_CWD_MISMATCH": "Pass the exact projectCwd bound to the selected conversationId; do not pass sender cwd.",
+    "ANTIGRAVITY_PROJECT_SCOPE_INVALID": "Verify that cwd matches the target conversation's bound project directory within allowed roots.",
+    "ANTIGRAVITY_WORKSPACE_MISMATCH": "Target conversation workspace changed; refresh discovery before sending.",
+    "ANTIGRAVITY_RECEIPT_OWNER_MISMATCH": "Read the receipt from the original sending conversation that owns this requestId.",
+    "ANTIGRAVITY_RECEIPT_ACCOUNT_MISMATCH": "Verify the signed-in account matches the sender that created this receipt.",
+    "ANTIGRAVITY_RECIPIENT_BUSY": "Target conversation is busy; stop without interrupting or rerouting to another chat.",
+    "ANTIGRAVITY_RECIPIENT_MISSING": "Refresh discovery and select an active Desktop conversation.",
     "RELAY_UNREACHABLE": "Inspect native relay registration and its actual endpoint.",
     "ANTIGRAVITY_SIDECAR_UNAVAILABLE": "Inspect the Desktop sidecar; this does not prove the app is closed.",
     "WORKER_RELAY_NOT_CONFIGURED": "This is a CLI worker diagnostic, not Desktop readiness.",
@@ -110,13 +118,44 @@ def inspect_status(data, host):
             return [error]
         available = desktop.get("available")
         if available is True:
-            return [check("desktop", "pass", "SIDECAR_REPORTED_AVAILABLE", "Read-only readiness only; reverse route and messages are unverified.")]
+            checks = [check("desktop", "pass", "SIDECAR_REPORTED_AVAILABLE", "Read-only readiness only; reverse route and messages are unverified.")]
+            outbound = object_value(data.get("outbound", {}))
+            if any(k in desktop for k in ("crossProjectDiscovery", "receiptProjectFields")) or "targetCwdRequired" in outbound:
+                cp_ready = (
+                    desktop.get("crossProjectDiscovery") is True
+                    and desktop.get("receiptProjectFields") is True
+                    and outbound.get("targetCwdRequired") is True
+                )
+                checks.append(
+                    check(
+                        "cross_project",
+                        "pass" if cp_ready else "unknown",
+                        "CROSS_PROJECT_CAPABILITY_REPORTED" if cp_ready else "SAME_PROJECT_ONLY",
+                        "Bind (conversationId, title, projectCwd) and pass target projectCwd as cwd."
+                        if cp_ready
+                        else "Cross-project capability flags incomplete; restrict to same-project routing.",
+                    )
+                )
+            return checks
         if available is False:
             return [check("desktop", "fail", "SIDECAR_REPORTED_UNAVAILABLE", "Inspect sidecar configuration without opening chats.")]
     else:
         sender = object_value(data.get("sender", {})).get("status")
         if sender == "verified":
-            return [check("sender", "pass", "SENDER_REPORTED_VERIFIED", "Identity only; Codex discovery and delivery remain unverified.")]
+            checks = [check("sender", "pass", "SENDER_REPORTED_VERIFIED", "Identity only; Codex discovery and delivery remain unverified.")]
+            if "codexScope" in data or "targetCwdRequired" in data:
+                cp_ready = data.get("codexScope") == "all-saved-local-projects" and data.get("targetCwdRequired") is True
+                checks.append(
+                    check(
+                        "cross_project",
+                        "pass" if cp_ready else "unknown",
+                        "CROSS_PROJECT_CAPABILITY_REPORTED" if cp_ready else "SAME_PROJECT_ONLY",
+                        "Bind (conversationId, title, projectCwd) and pass target projectCwd as cwd on reads and sends."
+                        if cp_ready
+                        else "Cross-project capability flags incomplete; restrict to same-project routing.",
+                    )
+                )
+            return checks
         if sender == "unverified":
             return [check("sender", "fail", "ANTIGRAVITY_SENDER_UNVERIFIED", DIAGNOSTICS["ANTIGRAVITY_SENDER_UNVERIFIED"])]
     return [check("bridge", "unknown", "STATUS_NOT_RECOGNIZED", "Use the decoded JSON body from the correct host's status tool.")]

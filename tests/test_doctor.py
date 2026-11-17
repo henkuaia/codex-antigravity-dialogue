@@ -103,6 +103,33 @@ class DoctorTests(unittest.TestCase):
         check = doctor.inspect_status({"sender": {"status": "verified"}}, "antigravity")[0]
         self.assertEqual(check["code"], "SENDER_REPORTED_VERIFIED")
 
+    def test_cross_project_capability_requires_explicit_flags_not_version_alone(self):
+        codex_cp = doctor.inspect_status(
+            {
+                "version": "2.3.2",
+                "desktop": {"available": True, "crossProjectDiscovery": True, "receiptProjectFields": True},
+                "outbound": {"targetCwdRequired": True},
+            },
+            "codex",
+        )
+        self.assertEqual(codex_cp[1]["code"], "CROSS_PROJECT_CAPABILITY_REPORTED")
+        codex_partial = doctor.inspect_status(
+            {
+                "version": "2.3.2",
+                "desktop": {"available": True, "crossProjectDiscovery": True},
+            },
+            "codex",
+        )
+        self.assertEqual(codex_partial[1]["code"], "SAME_PROJECT_ONLY")
+        agy_cp = doctor.inspect_status(
+            {"version": "2.3.2", "sender": {"status": "verified"}, "codexScope": "all-saved-local-projects", "targetCwdRequired": True},
+            "antigravity",
+        )
+        self.assertEqual(agy_cp[1]["code"], "CROSS_PROJECT_CAPABILITY_REPORTED")
+        for code in ("ANTIGRAVITY_TARGET_CWD_REQUIRED", "ANTIGRAVITY_TARGET_CWD_MISMATCH", "ANTIGRAVITY_PROJECT_SCOPE_INVALID"):
+            with self.subTest(code=code):
+                self.assertEqual(doctor.inspect_status({"code": code}, "antigravity")[0]["code"], code)
+
     def test_known_diagnostic_keeps_code_not_private_reason(self):
         check = doctor.inspect_status({"code": "RELAY_UNREACHABLE", "error": "private pipe path"}, "antigravity")[0]
         self.assertEqual(check["code"], "RELAY_UNREACHABLE")

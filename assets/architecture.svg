@@ -39,11 +39,11 @@
 
   <!-- Top Title Banner -->
   <text x="32" y="38" font-size="18" font-weight="700" fill="#0F172A">codex-antigravity-dialogue · 双端桌面 Agent 授信通信与任务交接架构</text>
-  <text x="32" y="59" font-size="12.5" fill="#475569">基于既有 MCP 桥接层实现同项目跨桌面安全交接：前置五项核验 → 单次幂等派单 → 传输层与任务态四层证据分离</text>
+  <text x="32" y="59" font-size="12.5" fill="#475569">支持同项目与能力验证后的跨项目安全交接：前置五项核验 → 单次幂等派单 → 传输层与任务态四层证据分离</text>
 
   <!-- Top Right Legend Pills -->
-  <rect x="840" y="20" width="116" height="24" rx="12" fill="#EFF6FF" stroke="#93C5FD" stroke-width="1"/>
-  <text x="898" y="36" font-size="11" font-weight="600" fill="#1D4ED8" text-anchor="middle">同项目路径强绑定</text>
+  <rect x="836" y="20" width="120" height="24" rx="12" fill="#EFF6FF" stroke="#93C5FD" stroke-width="1"/>
+  <text x="896" y="36" font-size="11" font-weight="600" fill="#1D4ED8" text-anchor="middle">目标元组 (ID+cwd)</text>
 
   <rect x="966" y="20" width="116" height="24" rx="12" fill="#FEF3C7" stroke="#FCD34D" stroke-width="1"/>
   <text x="1024" y="36" font-size="11" font-weight="600" fill="#B45309" text-anchor="middle">单请求 UUID 幂等</text>
@@ -62,7 +62,7 @@
     <!-- Stage 1 -->
     <rect x="226" y="86" width="312" height="58" rx="7" fill="#F8FAFC" stroke="#CBD5E1" stroke-width="1"/>
     <text x="238" y="108" font-size="12.5" font-weight="700" fill="#0F172A">Stage 1 · 前置五项核验 (Preflight Lock)</text>
-    <text x="238" y="128" font-size="10.2" fill="#475569">锁定宿主路由 · 同项目 cwd · 空闲目标 · 新 UUID · 授权边界</text>
+    <text x="238" y="128" font-size="10.2" fill="#475569">核验能力标志 · 绑定 (ID, title, targetCwd) · 新 UUID · 授权边界</text>
 
     <!-- Stage 2 -->
     <rect x="552" y="86" width="316" height="58" rx="7" fill="#F8FAFC" stroke="#CBD5E1" stroke-width="1"/>
@@ -133,8 +133,8 @@
     <!-- Reverse Route Card -->
     <rect x="386" y="308" width="468" height="64" rx="6" fill="#FFFFFF" stroke="#F59E0B" stroke-width="1.4"/>
     <text x="398" y="326" font-size="12" font-weight="700" fill="#B45309">反向链路｜Antigravity Desktop → Codex Desktop (回执与内容分步取回 ★)</text>
-    <text x="398" y="343" font-size="9.6" fill="#78350F">① 发送：核验 sender.status=&quot;verified&quot; → send_to_agent_task(target=&quot;codex&quot;, conversationId, ...)</text>
-    <text x="398" y="360" font-size="9.6" fill="#78350F">② 取回：read_agent_delivery 查传输态 + read_agent_task 读正文并核对 Reply-To: &lt;UUID&gt;</text>
+    <text x="398" y="343" font-size="9.6" fill="#78350F">① 发送：核验 sender.status=&quot;verified&quot; → send_to_agent_task(target=&quot;codex&quot;, conversationId, cwd)</text>
+    <text x="398" y="360" font-size="9.6" fill="#78350F">② 取回：read_agent_delivery 查传输态 + read_agent_task(..., cwd) 读正文并核对 Reply-To</text>
   </g>
 
   <!-- Center Lower Card: 4-Layer Evidence Ladder -->
@@ -183,13 +183,13 @@
     <text x="930" y="285" font-size="10.5" fill="#5B21B6" font-family="Consolas, monospace">· agent_bridge_status()</text>
     <text x="930" y="302" font-size="10.5" fill="#5B21B6" font-family="Consolas, monospace">· list_agent_tasks(target=&quot;codex&quot;)</text>
     <text x="930" y="319" font-size="10.5" fill="#5B21B6" font-family="Consolas, monospace">· send_to_agent_task(target=&quot;codex&quot;)</text>
-    <text x="930" y="336" font-size="10.5" fill="#5B21B6" font-family="Consolas, monospace">· read_agent_delivery() + read_agent_task()</text>
+    <text x="930" y="336" font-size="10.5" fill="#5B21B6" font-family="Consolas, monospace">· read_agent_delivery + read_agent_task(cwd)</text>
 
     <!-- Antigravity Box 2 -->
     <rect x="918" y="362" width="276" height="94" rx="7" fill="#F8FAFC" stroke="#CBD5E1" stroke-width="1"/>
-    <text x="930" y="382" font-size="12.5" font-weight="700" fill="#0F172A">2. 原生身份与工作区强校验</text>
+    <text x="930" y="382" font-size="12.5" font-weight="700" fill="#0F172A">2. 原生身份与目标元组绑定</text>
     <text x="930" y="401" font-size="10.8" fill="#475569">· 发送前必核 sender.status == &quot;verified&quot;</text>
-    <text x="930" y="419" font-size="10.8" fill="#475569">· 匹配同项目路径 (gitFolder.folderUri / folderUri)</text>
+    <text x="930" y="419" font-size="10.8" fill="#475569">· 绑定目标 (conversationId, title, projectCwd)</text>
     <text x="930" y="437" font-size="10.8" fill="#B45309" font-weight="600">· 仅使用 target=&quot;codex&quot;，严禁路由至 Claude</text>
 
     <!-- Antigravity Box 3 -->

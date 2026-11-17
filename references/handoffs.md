@@ -6,7 +6,7 @@ Read before an authorized send. Resolve placeholders from current context and li
 
 Before invoking `send_to_antigravity_conversation` or `send_to_agent_task`, verify and lock all five fields:
 1. **Host & Route**: `Codex → Antigravity` (`antigravity-bridge`, `surface="desktop"`) or `Antigravity → Codex` (`agent-bridge`, `target="codex"`).
-2. **Project & Target `cwd` Tuple**: In same-project mode, exact verified absolute directory matching `sender.cwd`; when the bridge supports cross-project discovery, lock the discovered `(conversationId, title, targetCwd)` tuple and confirm with the user whenever `targetCwd != sender.cwd`.
+2. **Tuple Binding (`(conversationId, title, targetCwd)`)**: On a same-project-only bridge, `targetCwd` must equal `sender.cwd`. When status explicitly reports cross-project capability (`desktop.crossProjectDiscovery=true` / `codexScope="all-saved-local-projects"` and `targetCwdRequired=true`), bind the discovered `(conversationId, title, targetCwd)` tuple (from `projectCwd` / `cwd`) and pass `cwd=targetCwd` for both target reads (`read_agent_task`) and sends. Respect the user's already-explicit target and scope authorization—do not force redundant reconfirmation merely because `sender.cwd` and `targetCwd` differ; ask only when the intended recipient or scope is genuinely ambiguous.
 3. **Recipient (`conversationId` & Title)**: Exact listed conversation/thread ID, confirmed idle.
 4. **Request UUID (`requestId`)**: Fresh UUID v4 generated once for this intentional message and retained across all subsequent checks.
 5. **Authorized Scope & Exclusions**: Read-only vs. permitted edits, plus explicit exclusions (no training, no extra sends, no config changes).
@@ -16,7 +16,7 @@ Before invoking `send_to_antigravity_conversation` or `send_to_agent_task`, veri
 ```text
 Author: <Codex or Antigravity>, acting on the user's authorized request.
 Request: <same UUID used in the tool call>
-Project: <verified absolute project directory>
+Project: <verified absolute targetCwd>
 Task: <specific requested action and scope; read-only or edits>
 Context: <only relevant facts, file paths, and unresolved questions>
 Constraints: <user exclusions and permissions that affect this task>
@@ -60,14 +60,14 @@ When a send remains `pending`, `accepted`, or `delivered` (awaiting task read) a
 ```text
 Handoff Ledger:
 - Host / Route: <Codex -> Antigravity (desktop) | Antigravity -> Codex (target=codex)>
-- Project (cwd): <verified absolute path>
+- Sender / Target cwd: <sender.cwd> -> <targetCwd>
 - Destination: <conversationId> (<title>)
 - Request ID: <UUID>
 - Transport Evidence: <pending | accepted | delivered | reply_received>
 - Task Outcome: <unknown | needs input | reported complete | failed>
 ```
 
-When the user says "continue" or "check the reply", recover the `Host`, `Project`, `Destination`, and `Request ID` from the current chat and read the existing receipt/task first:
+When the user says "continue" or "check the reply", recover the `Host`, `Sender / Target cwd`, `Destination`, and `Request ID` from the current chat and read the existing receipt/task first:
 - On **Codex**: call `read_antigravity_delivery(surface="desktop", requestId="<UUID>")`.
-- On **Antigravity**: call `read_agent_delivery(requestId="<UUID>")` and then `read_agent_task(target="codex", conversationId="<Destination>")`, verifying that the latest Codex reply matches `Reply-To: <UUID>` or the task request (never mistaking an older turn in that thread for the new reply).
+- On **Antigravity**: call `read_agent_delivery(requestId="<UUID>")` and then `read_agent_task(target="codex", conversationId="<Destination>", cwd="<targetCwd>")` (omitting `cwd` only if the installed schema lacks it), verifying that the latest Codex reply matches `Reply-To: <UUID>` or the task request (never mistaking an older turn in that thread for the new reply).
 - Do not generate a new UUID and repeat the task. If the receipt has expired or cannot be found, report the uncertainty instead of inferring non-delivery.

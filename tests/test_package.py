@@ -87,13 +87,28 @@ class PackageTests(unittest.TestCase):
         data = json.loads((ROOT / "evals/scenarios.json").read_text(encoding="utf-8"))
         cases = data["scenarios"]
         self.assertEqual(len(cases), len({case["id"] for case in cases}))
-        self.assertGreaterEqual(len(cases), 9)
+        self.assertGreaterEqual(len(cases), 10)
         for case in cases:
             with self.subTest(case=case["id"]):
                 self.assertTrue(case["request"])
                 self.assertTrue(case["context"])
                 self.assertTrue(case["expected"])
                 self.assertTrue(case["forbidden"])
+
+    def test_no_private_user_paths_or_live_conversation_ids_in_repo_files(self):
+        forbidden_patterns = (
+            r"(?i)[a-z]:\\users\\",
+            r"(?i)[a-z]:/users/",
+            r"(?i)/Users/[a-z0-9_.-]+/",
+            r"\b[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}\b",
+        )
+        for path in ROOT.rglob("*"):
+            if not path.is_file() or ".git" in path.parts or "__pycache__" in path.parts or path.suffix == ".zip":
+                continue
+            text = path.read_text(encoding="utf-8")
+            for pat in forbidden_patterns:
+                with self.subTest(file=path.name, pattern=pat):
+                    self.assertIsNone(re.search(pat, text), f"Private path/UUID pattern {pat} found in {path}")
 
 
 if __name__ == "__main__":

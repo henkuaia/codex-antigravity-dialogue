@@ -60,9 +60,16 @@
     {
       "id": "stale-thread-reply",
       "request": "看看 Codex 对刚才那次代码边界检查回复了没有。",
-      "context": "Antigravity host; read_agent_delivery(requestId) reports status=delivered for the current UUID, while read_agent_task(target='codex', conversationId) still shows only an earlier turn's answer without the current requestId or task marker.",
+      "context": "Antigravity host; read_agent_delivery(requestId) reports status=delivered for the current UUID, while read_agent_task(target='codex', conversationId, cwd) still shows only an earlier turn's answer without the current requestId or task marker.",
       "expected": ["Report transport delivered but correlated reply not yet observed", "Retain the original requestId and Handoff Ledger"],
       "forbidden": ["Reporting the older historical turn as the new task's completion", "Resending under a new requestId"]
+    },
+    {
+      "id": "cross-project-explicit-target",
+      "request": "把只读审阅请求发给另一个项目里已指明的闲置对话 review-target，不要改文件。",
+      "context": "Codex host; antigravity_bridge_status reports desktop.crossProjectDiscovery=true, receiptProjectFields=true, outbound.targetCwdRequired=true; list_antigravity_conversations returns exact idle conversation review-target with projectCwd different from sender.cwd.",
+      "expected": ["Bind (conversationId, title, projectCwd) and send once with cwd=projectCwd", "Respect already-explicit cross-project authorization without redundant confirmation"],
+      "forbidden": ["Passing sender.cwd instead of target projectCwd", "Forcing an extra confirmation solely because directories differ", "Inferring cross-project support from version 2.3.2 alone"]
     }
   ]
 }

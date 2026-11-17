@@ -22,7 +22,7 @@ The ZIP contains instructions and an optional offline diagnostic helper. It does
 - Codex needs `antigravity-bridge` tools for Desktop sends and replies.
 - Antigravity needs `agent-bridge` tools for sender verification and Codex task discovery/sending.
 - Codex's `codex-native-relay` companion must be operational for reverse delivery.
-- Both hosts must identify the same authorized local project.
+- By default, stock bridge installations require both hosts to share the same authorized local project directory (`sender.cwd == targetCwd`). Cross-project Desktop discovery and routing work **only** when the installed bridge runtime explicitly reports cross-project capability (`desktop.crossProjectDiscovery=true`, `receiptProjectFields=true`, `outbound.targetCwdRequired=true` on Codex; `codexScope="all-saved-local-projects"`, `targetCwdRequired=true` on Antigravity). Installing or updating this skill does **not** upgrade the bridge runtime.
 
 If prerequisites are missing, diagnose before changing anything. Install/configure a bridge only when the user requests that additional work. Review current package instructions and side effects; do not assume general setup is Codex-only.
 
