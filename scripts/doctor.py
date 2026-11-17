@@ -17,6 +17,7 @@ DIAGNOSTICS = {
     "MODULE_NOT_FOUND": "Check the configured runtime and entry files.",
     "ANTIGRAVITY_SENDER_UNVERIFIED": "Check native sender and project identity; do not bypass verification.",
     "BRIDGE_ACCOUNT_UNVERIFIED": "Check the required account for the Codex target; do not install another provider.",
+    "BRIDGE_OPERATION_FAILED": "Check whether the sender workspace matches a saved local Codex project; do not spoof cwd.",
     "RELAY_UNREACHABLE": "Inspect native relay registration and its actual endpoint.",
     "ANTIGRAVITY_SIDECAR_UNAVAILABLE": "Inspect the Desktop sidecar; this does not prove the app is closed.",
     "WORKER_RELAY_NOT_CONFIGURED": "This is a CLI worker diagnostic, not Desktop readiness.",

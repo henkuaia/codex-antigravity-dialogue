@@ -6,8 +6,8 @@ Read before an authorized send. Resolve placeholders from current context and li
 
 Before invoking `send_to_antigravity_conversation` or `send_to_agent_task`, verify and lock all five fields:
 1. **Host & Route**: `Codex → Antigravity` (`antigravity-bridge`, `surface="desktop"`) or `Antigravity → Codex` (`agent-bridge`, `target="codex"`).
-2. **Project (`cwd`)**: Exact verified absolute directory matching the target conversation's project.
-3. **Recipient (`conversationId` & Title)**: Exact listed conversation/thread ID in the same project, confirmed idle.
+2. **Project & Target `cwd` Tuple**: In same-project mode, exact verified absolute directory matching `sender.cwd`; when the bridge supports cross-project discovery, lock the discovered `(conversationId, title, targetCwd)` tuple and confirm with the user whenever `targetCwd != sender.cwd`.
+3. **Recipient (`conversationId` & Title)**: Exact listed conversation/thread ID, confirmed idle.
 4. **Request UUID (`requestId`)**: Fresh UUID v4 generated once for this intentional message and retained across all subsequent checks.
 5. **Authorized Scope & Exclusions**: Read-only vs. permitted edits, plus explicit exclusions (no training, no extra sends, no config changes).
 
