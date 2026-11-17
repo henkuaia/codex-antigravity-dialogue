@@ -113,19 +113,61 @@ class DoctorTests(unittest.TestCase):
             "codex",
         )
         self.assertEqual(codex_cp[1]["code"], "CROSS_PROJECT_CAPABILITY_REPORTED")
-        codex_partial = doctor.inspect_status(
-            {
-                "version": "2.3.2",
-                "desktop": {"available": True, "crossProjectDiscovery": True},
-            },
-            "codex",
-        )
-        self.assertEqual(codex_partial[1]["code"], "SAME_PROJECT_ONLY")
         agy_cp = doctor.inspect_status(
             {"version": "2.3.2", "sender": {"status": "verified"}, "codexScope": "all-saved-local-projects", "targetCwdRequired": True},
             "antigravity",
         )
         self.assertEqual(agy_cp[1]["code"], "CROSS_PROJECT_CAPABILITY_REPORTED")
+
+        negative_cases = (
+            ("codex-version-only", "codex", {"version": "2.3.2", "desktop": {"available": True}}),
+            ("codex-partial", "codex", {"version": "2.3.2", "desktop": {"available": True, "crossProjectDiscovery": True}}),
+            (
+                "codex-false-flag",
+                "codex",
+                {
+                    "version": "2.3.2",
+                    "desktop": {"available": True, "crossProjectDiscovery": False, "receiptProjectFields": True},
+                    "outbound": {"targetCwdRequired": True},
+                },
+            ),
+            (
+                "codex-string-flags",
+                "codex",
+                {
+                    "version": "2.3.2",
+                    "desktop": {"available": True, "crossProjectDiscovery": "true", "receiptProjectFields": "true"},
+                    "outbound": {"targetCwdRequired": "true"},
+                },
+            ),
+            ("agy-version-only", "antigravity", {"version": "2.3.2", "sender": {"status": "verified"}}),
+            (
+                "agy-partial-missing-target-cwd",
+                "antigravity",
+                {"version": "2.3.2", "sender": {"status": "verified"}, "codexScope": "all-saved-local-projects"},
+            ),
+            (
+                "agy-false-target-cwd",
+                "antigravity",
+                {"version": "2.3.2", "sender": {"status": "verified"}, "codexScope": "all-saved-local-projects", "targetCwdRequired": False},
+            ),
+            (
+                "agy-string-target-cwd",
+                "antigravity",
+                {"version": "2.3.2", "sender": {"status": "verified"}, "codexScope": "all-saved-local-projects", "targetCwdRequired": "true"},
+            ),
+            (
+                "agy-wrong-scope",
+                "antigravity",
+                {"version": "2.3.2", "sender": {"status": "verified"}, "codexScope": "same-project", "targetCwdRequired": True},
+            ),
+        )
+        for label, host, payload in negative_cases:
+            with self.subTest(case=label):
+                checks = doctor.inspect_status(payload, host)
+                codes = [item["code"] for item in checks]
+                self.assertNotIn("CROSS_PROJECT_CAPABILITY_REPORTED", codes)
+
         for code in ("ANTIGRAVITY_TARGET_CWD_REQUIRED", "ANTIGRAVITY_TARGET_CWD_MISMATCH", "ANTIGRAVITY_PROJECT_SCOPE_INVALID"):
             with self.subTest(code=code):
                 self.assertEqual(doctor.inspect_status({"code": code}, "antigravity")[0]["code"], code)

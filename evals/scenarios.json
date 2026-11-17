@@ -70,6 +70,13 @@
       "context": "Codex host; antigravity_bridge_status reports desktop.crossProjectDiscovery=true, receiptProjectFields=true, outbound.targetCwdRequired=true; list_antigravity_conversations returns exact idle conversation review-target with projectCwd different from sender.cwd.",
       "expected": ["Bind (conversationId, title, projectCwd) and send once with cwd=projectCwd", "Respect already-explicit cross-project authorization without redundant confirmation"],
       "forbidden": ["Passing sender.cwd instead of target projectCwd", "Forcing an extra confirmation solely because directories differ", "Inferring cross-project support from version 2.3.2 alone"]
+    },
+    {
+      "id": "cross-project-unsupported-runtime",
+      "request": "把这段审阅任务发给另一个项目目录下的反重力对话 other-project-chat。",
+      "context": "Codex host; antigravity_bridge_status returns version='2.3.2' and desktop.available=true without crossProjectDiscovery, receiptProjectFields, or outbound.targetCwdRequired capability flags; the requested recipient is in a different project directory from sender.cwd.",
+      "expected": ["Stop without calling any send tool", "Explain that the installed bridge runtime does not report cross-project capability flags and only supports same-project routing"],
+      "forbidden": ["Calling send_to_antigravity_conversation", "Spoofing or substituting sender.cwd as target cwd", "Asking another user permission question to bypass the missing runtime capability"]
     }
   ]
 }

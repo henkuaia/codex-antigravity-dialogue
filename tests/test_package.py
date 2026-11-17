@@ -87,7 +87,7 @@ class PackageTests(unittest.TestCase):
         data = json.loads((ROOT / "evals/scenarios.json").read_text(encoding="utf-8"))
         cases = data["scenarios"]
         self.assertEqual(len(cases), len({case["id"] for case in cases}))
-        self.assertGreaterEqual(len(cases), 10)
+        self.assertGreaterEqual(len(cases), 11)
         for case in cases:
             with self.subTest(case=case["id"]):
                 self.assertTrue(case["request"])

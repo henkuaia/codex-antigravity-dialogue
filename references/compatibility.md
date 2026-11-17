@@ -1,17 +1,17 @@
 # Compatibility and Evidence
 
-Skill release: **0.1.0**. This is the first packaged release, not a claim of universal Desktop compatibility.
+Skill revision: **0.1.1-dev** (unreleased `main` branch). The published GitHub Release **v0.1.0** is a historical snapshot from `2026-11-16` and does **not** include these updates. Neither revision claims universal Desktop compatibility.
 
 | Component | Scope | Evidence |
 | --- | --- | --- |
 | Same-project Codex Desktop to Antigravity Desktop | Existing chat in the same verified project | A locally modified bridge `2.3.2` produced a correlated reply on Windows on `2026-11-16`. |
 | Same-project Antigravity Desktop to Codex Desktop | Verified sender, existing Codex chat, native relay | The same installation delivered a reverse message on `2026-11-16`. |
 | Cross-project Codex Desktop to Antigravity Desktop | Patched local bridge `2.3.2` (`desktop.crossProjectDiscovery=true`, `receiptProjectFields=true`, `outbound.targetCwdRequired=true`) | Verified live on Windows on `2026-11-17`: cross-project forward send and correlated `reply_received` succeeded. Does not prove an independently initiated live cross-project reverse send. |
-| Cross-project Antigravity Desktop to Codex Desktop | Patched local bridge `2.3.2` (`codexScope="all-saved-local-projects"`, `targetCwdRequired=true`) | Contract and automated unit tests verify discovery (`isSameProject` sorted first), explicit target `cwd` on both `read_agent_task` and `send_to_agent_task`, and dual-path receipts (`senderCwd`/`targetCwd`). Independently initiated live reverse dispatch across projects has not been separately verified. |
+| Cross-project Antigravity Desktop to Codex Desktop | Patched local bridge `2.3.2` (`codexScope="all-saved-local-projects"`, `targetCwdRequired=true`) | Covered by separate, unpublished local bridge runtime tests (`isSameProject` ordering, explicit target `cwd` on `read_agent_task` and `send_to_agent_task`, dual-path receipts `senderCwd`/`targetCwd`). Independently initiated live reverse dispatch across projects has not been verified. |
 | Stock upstream bridge `2.3.2` or other versions | Inspect installed schemas and status flags first | Same-project only unless capability flags are present; not established by local patched runs. |
 | Other operating systems and Desktop builds | Instructions may apply | No live integration verification recorded; exact app builds from the historical tests were not retained. |
-| Offline diagnostic helper (`scripts/doctor.py`) | Python 3.11+, standard library | Automated fixture tests; no network or dispatch. |
-| Agent behavior under these instructions | 10 evaluation scenarios supplied | Scenarios are not a completed model evaluation or proof of instruction following. |
+| Offline diagnostic helper (`scripts/doctor.py`) | Python 3.11+, standard library | Executed offline fixture unit tests in `tests/`; no network or dispatch. |
+| Agent behavior under these instructions | 11 evaluation scenarios in `evals/scenarios.json` | Evaluation input prompts and expected/forbidden criteria only; not an executed model evaluation or proof of instruction following. |
 
 Local bridge runtime patches (covering project metadata compatibility, Codex-only account routing, entry paths, relay registration, and cross-project `(conversationId, title, projectCwd)` tuple routing) live in a separate local runtime working copy. They have **not** been published upstream and are **not** bundled with this skill. Do not imply that installing or updating this skill upgrades the bridge runtime, and never bypass native verification to imitate those patches.
 

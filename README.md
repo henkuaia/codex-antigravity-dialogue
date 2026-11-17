@@ -5,19 +5,20 @@
 **面向 OpenAI Codex Desktop 与 Google Antigravity Desktop（反重力）的双端授信通信与任务交接 Agent Skill**<br/>
 *目标元组 `(conversationId, title, targetCwd)` 强绑定 · 前置五项核验 · 单请求 UUID 幂等防重 · 双端非对称回执关联 · 零联网脱敏诊断*
 
-[![Release](https://img.shields.io/badge/Release-v0.1.0-2563eb?style=flat-square)](https://github.com/henkuaia/codex-antigravity-dialogue/releases)
+[![Revision](https://img.shields.io/badge/Revision-main_(0.1.1--dev)-2563eb?style=flat-square)](https://github.com/henkuaia/codex-antigravity-dialogue/commits/main)
+[![Historical Release](https://img.shields.io/badge/Historical_Release-v0.1.0-64748b?style=flat-square)](https://github.com/henkuaia/codex-antigravity-dialogue/releases/tag/v0.1.0)
 [![Agent Skills](https://img.shields.io/badge/Standard-SKILL.md-0d9488?style=flat-square)](SKILL.md)
 [![Hosts](https://img.shields.io/badge/Desktop_Hosts-Codex_%E2%86%94_Antigravity-7c3aed?style=flat-square)](#双端架构与非对称路由)
 [![Offline Doctor](https://img.shields.io/badge/Doctor_CLI-Python_3.11%2B_Stdlib-d97706?style=flat-square)](#零联网只读诊断)
-[![Tests](https://img.shields.io/badge/Verification-Unittest_%2B_10_Evals-16a34a?style=flat-square)](#兼容范围与验证矩阵)
+[![Tests](https://img.shields.io/badge/Verification-Offline_Tests_%2B_11_Eval_Prompts-16a34a?style=flat-square)](#兼容范围与验证矩阵)
 [![License: MIT](https://img.shields.io/badge/License-MIT-f59e0b?style=flat-square)](LICENSE)
 
 <br/>
 
+[**快速安装**](#快速安装到两端宿主) ·
 [**为什么需要本 Skill**](#为什么需要本-skill) ·
 [**双端架构与非对称路由**](#双端架构与非对称路由) ·
 [**四层证据阶梯**](#四层证据阶梯) ·
-[**快速安装**](#安装到两端宿主) ·
 [**复制即用指令库**](#按场景使用指令库) ·
 [**离线诊断 (`doctor.py`)**](#零联网只读诊断) ·
 [**验证与兼容边界**](#兼容范围与验证矩阵)
@@ -27,7 +28,24 @@
 ---
 
 > [!IMPORTANT]
-> **定位与边界声明：** 本仓库是独立维护的**双端工作流指令与离线诊断 Skill（版本 `0.1.0`）**，不是 OpenAI 或 Google 官方产品，也不是 MCP 服务器或一键桥接安装器。使用本 Skill 需宿主已具备可用的底层桥接与原生权限；**安装或更新本 Skill 不会升级底层桥接运行时（Runtime），全程仅在 Codex 与反重力桌面会话间通信，不需要 Claude，也绝不用后台 CLI Worker 冒充桌面对话。**
+> **版本与边界声明：** 当前 `main` 分支为未发布 Release 的开发修订版 **`0.1.1-dev`**；GitHub Releases 中的 [`v0.1.0`](https://github.com/henkuaia/codex-antigravity-dialogue/releases/tag/v0.1.0) 是 `2026-11-16` 的早期历史快照（**不含当前 `main` 分支的跨项目元组绑定、三段式协议与诊断更新，请勿使用旧 `v0.1.0` ZIP 安装当前版本**）。本仓库是独立维护的工作流指令与离线诊断 Skill，不是 OpenAI 或 Google 官方产品，也不是 MCP 服务器或桥接安装器；**安装或更新本 Skill 不会升级底层桥接运行时（Runtime），全程仅在 Codex 与反重力桌面会话间通信，不需要 Claude，也绝不用后台 CLI Worker 冒充桌面对话。**
+
+---
+
+<a id="快速安装到两端宿主"></a>
+## 快速安装到两端宿主（基于当前 `main` 分支 `0.1.1-dev`）
+
+1. **克隆当前 `main` 分支并构建纯净运行时包**（生成 `dist/codex-antigravity-dialogue-v0.1.1-dev.zip`，仅含 8 个运行时文件）：
+   ```powershell
+   git clone https://github.com/henkuaia/codex-antigravity-dialogue.git
+   cd codex-antigravity-dialogue
+   python scripts/package.py
+   # 产物路径：dist/codex-antigravity-dialogue-v0.1.1-dev.zip
+   ```
+2. **解压或同步至双端宿主的 Skill 目录**（保持双端版本一致，确保 `SKILL.md` 位于 `codex-antigravity-dialogue/` 根部，并保留 `agents/`、`references/` 和 `scripts/`；若已有同名目录先核对本地修改，保留无关文件）：
+   - **Codex Desktop**：`<CODEX_HOME>/skills/codex-antigravity-dialogue/`（默认 `~/.codex/skills/codex-antigravity-dialogue/`，对话中用 `$codex-antigravity-dialogue` 调用）
+   - **Google Antigravity Desktop**：`~/.gemini/config/skills/codex-antigravity-dialogue/`（对话中指明使用 `codex-antigravity-dialogue` 调用）
+3. **刷新与前置检查**：写入磁盘不代表当前已打开的会话已重新加载；必要时刷新宿主 Skill 列表或开启新会话。宿主目录定位规则与底层 MCP 前置条件详见 [安装说明](references/installation.md)。
 
 ---
 
@@ -82,14 +100,14 @@ codex-antigravity-dialogue/
 │   └── compatibility.md                 # 版本与能力标志证据边界、工具 Schema 要求与真机集成验收标准
 ├── scripts/
 │   ├── doctor.py                        # 【随包分发】Python 3.11+ 纯标准库零联网只读配置/状态/回执脱敏诊断器
-│   └── package.py                       # 【开发者工具】按显式白名单构建纯净发布包 dist/*.zip
+│   └── package.py                       # 【开发者工具】按显式白名单构建 dist/codex-antigravity-dialogue-v0.1.1-dev.zip
 ├── assets/
 │   └── architecture.svg                 # 双端桌面 Agent 授信通信与任务交接矢量架构图
 ├── evals/
-│   └── scenarios.json                   # 【仓库评估集】10 个核心行为评估场景（含只读状态、歧义拦截、忙状态保护、历史旧回复防误读、跨项目元组绑定等）
+│   └── scenarios.json                   # 【评估输入集】11 个 Agent 行为评估提示词与预期/禁止判据（仅作 Mock 测试输入，非评测结果）
 └── tests/
-    ├── test_doctor.py                   # 离线诊断器全分支单元测试（禁执行子进程、禁联网、防私钥泄漏、跨项目能力标志与全状态机断言）
-    └── test_package.py                  # 发布包白名单校验、Markdown/HTML 链接与锚点完整性、CommonMark 格式规范校验
+    ├── test_doctor.py                   # 离线诊断器单元测试（禁子进程、禁联网、防私钥泄漏、跨项目能力标志与状态/回执夹具断言）
+    └── test_package.py                  # 发布包白名单校验、Markdown/HTML 链接与锚点完整性、CommonMark 格式与隐私脱敏校验
 ```
 
 ---
@@ -117,22 +135,6 @@ Handoff Ledger:
 - Transport Evidence: delivered (awaiting correlated task read)
 - Task Outcome: unknown
 ```
-
----
-
-<a id="安装到两端宿主"></a>
-## 安装到两端宿主
-
-1. **获取源码或发布包**：克隆本仓库，或下载 [GitHub Releases](https://github.com/henkuaia/codex-antigravity-dialogue/releases) 中的 `codex-antigravity-dialogue-v0.1.0.zip`（仅含 8 个运行时文件，不含测试套件与评估集）。
-2. **确认双端宿主的实际 Skill 根目录**：将运行时文件放置于 `<skill-root>/codex-antigravity-dialogue/` 下（确保 `SKILL.md` 直接位于该目录根部，并完整保留 `agents/`、`references/` 和 `scripts/`）：
-
-| 宿主客户端 | 常用个人级安装路径（Windows 开发机实测） | 调用方式说明 |
-| :--- | :--- | :--- |
-| **OpenAI Codex Desktop** | `<CODEX_HOME>/skills/codex-antigravity-dialogue/`<br>*(默认 `~/.codex/skills/codex-antigravity-dialogue/`)* | 在对话中显式输入 `$codex-antigravity-dialogue` 或通过自然语言指明使用该技能 |
-| **Google Antigravity Desktop** | `~/.gemini/config/skills/codex-antigravity-dialogue/` | 在对话中指明使用 `codex-antigravity-dialogue` 进行跨端通信或状态核查 |
-
-3. **保持双端版本同步**：更新 `SKILL.md`、`references/` 或 `scripts/doctor.py` 后，需同步更新 Codex 与反重力两端的安装副本（保留目标目录中与本 Skill 无关的其他内容）。若目标位置已有同名 Skill，先核对差异，避免盲目覆盖本地修改。
-4. **刷新与会话生效**：磁盘文件写入不代表当前已打开的会话已重新加载；必要时刷新宿主 Skill 列表或在新会话中确认识别成功。更多细节见 [安装说明](references/installation.md)。
 
 ---
 
@@ -228,24 +230,23 @@ python scripts/doctor.py --host codex --delivery "<receipt.json>" --request-id "
 <a id="兼容范围与验证矩阵"></a>
 ## 兼容范围与验证矩阵
 
-本 Skill 的指令与运行时桥接能力严格区分**已实机验证的范围**、**仅由本地契约/单元测试覆盖的范围**与**未验证边界**（详见 [兼容与证据说明](references/compatibility.md)）：
+本仓库严格区分**历史实机通信证据**、**本仓库内执行的离线单元测试**、**未执行的 Agent 行为评估提示集**以及**独立的未公开桥接运行时测试**，不将不同层级的检查混为一谈（详见 [兼容与证据说明](references/compatibility.md)）：
 
-| 能力模块 / 验证层级 | 适用前提与能力标志 | 当前验证证据与诚实边界 |
+| 维度 / 检查类别 | 适用范围与位置 | 已验证事实与明确边界 |
 | :--- | :--- | :--- |
-| **1. 同项目桌面双向通信**<br>*(Same-Project Bidirectional)* | 发送方与接收方位于同一已验证项目目录（`sender.cwd == targetCwd`） | **已实机验证（2026-11-16，Windows）**：基于本地兼容修正的 `bridge 2.3.2` 完成正向关联回复与反向投递闭环 |
-| **2. 跨项目桌面正向通信与取回**<br>*(Cross-Project Forward: Codex → Antigravity)* | 本地补丁版 `bridge 2.3.2`（`desktop.crossProjectDiscovery=true`、`receiptProjectFields=true`、`outbound.targetCwdRequired=true`） | **已实机验证（2026-11-17，Windows）**：Codex 跨工作区发现目标反重力桌面会话、传入目标 `projectCwd` 发送并成功取回关联 `reply_received` 回复 |
-| **3. 跨项目桌面反向路由契约**<br>*(Cross-Project Reverse: Antigravity → Codex)* | 本地补丁版 `bridge 2.3.2`（`codexScope="all-saved-local-projects"`、`targetCwdRequired=true`） | **已由契约与自动化单元测试覆盖**：验证全量已保存项目发现（`isSameProject` 排序优先）、`read_agent_task` 与 `send_to_agent_task` 强制目标 `cwd` 校验及双路径回执；**尚未单独进行反重力主动发起的跨项目实机反向发送验证** |
-| **4. 上游未修改版桥接 / 其他系统** | 未包含本地跨项目运行时补丁的环境 | **未建立跨项目能力**：无跨项目能力标志时仅限同项目工作流；**本仓库不捆绑桥接运行时补丁，安装本 Skill 不会升级底层桥接服务** |
-| **5. 离线诊断与打包测试套件** | [`tests/test_doctor.py`](tests/test_doctor.py) · [`tests/test_package.py`](tests/test_package.py) · [`evals/scenarios.json`](evals/scenarios.json) | **31 项自动化单元测试 + 10 个行为评估场景**：覆盖配置/状态/跨项目能力标志/回执全分支断言、零子进程/零联网拦截、私钥路径脱敏、发布包白名单与 Markdown 链接/锚点/加粗规范校验 |
+| **1. 同项目桌面双向实机通信** | 发送方与接收方位于同一已验证项目目录（`sender.cwd == targetCwd`） | **已实机验证（2026-11-16，Windows）**：基于本地兼容修正的 `bridge 2.3.2` 完成正向关联回复与反向投递 |
+| **2. 跨项目桌面正向实机通信**<br>*(Codex → Antigravity)* | 本地补丁版 `bridge 2.3.2`（`desktop.crossProjectDiscovery=true`、`receiptProjectFields=true`、`outbound.targetCwdRequired=true`） | **已实机验证（2026-11-17，Windows）**：Codex 跨工作区发现目标反重力桌面会话、传入目标 `projectCwd` 发送并成功取回关联 `reply_received` 回复 |
+| **3. 跨项目桌面反向路由**<br>*(Antigravity → Codex)* | 本地补丁版 `bridge 2.3.2`（`codexScope="all-saved-local-projects"`、`targetCwdRequired=true`） | **由独立的未公开本地桥接运行时测试覆盖**（验证 `isSameProject` 排序、`read_agent_task` 与 `send_to_agent_task` 目标 `cwd` 校验及双路径回执）；**尚未单独执行由反重力主动发起的跨项目实机反向发送验证** |
+| **4. 上游未修改版桥接 / 其他环境** | 未包含本地运行时补丁的桥接安装、其他操作系统或不同 Desktop 构建版本 | 无跨项目能力标志时仅限同项目工作流；**本地桥接运行时补丁未发布至上游且不随本 Skill 捆绑，安装本 Skill 不会升级底层桥接服务** |
+| **5. 本仓库离线单元测试**<br>*([`tests/test_doctor.py`](tests/test_doctor.py) · [`tests/test_package.py`](tests/test_package.py))* | 本仓库内通过 `unittest` 自动执行（GitHub Actions 覆盖 Windows/Linux 与 Python 3.11/3.13） | 使用离线夹具验证 `doctor.py` 的配置/状态/跨项目能力标志/回执解析、禁子进程/禁联网约束、脱敏输出、发布包白名单与文档链接/格式；**不连接真实 Agent 或在线桥接** |
+| **6. Agent 行为评估提示集**<br>*([`evals/scenarios.json`](evals/scenarios.json))* | 11 个结构化场景（含只读检查、歧义拦截、超时续查、忙状态保护、身份未验、追问非完成、标准交接、防回拨、旧回复防误读、已授权跨项目发送、无跨项目能力运行时拦截） | **仅提供评估输入提示词与 `expected` / `forbidden` 预期判据，不是已执行的模型评测结果，也不证明模型在真实会话中的指令遵循率**；评估时须使用 Mock 工具返回，切勿直接发往生产对话 |
 
-开发者在仓库根目录运行全量测试与打包：
+开发者在仓库根目录运行离线测试与打包：
 
 ```powershell
 python -m unittest discover -s tests -v
 python scripts/package.py
 ```
-
-GitHub Actions（[`.github/workflows/test.yml`](.github/workflows/test.yml)）已配置 `ubuntu-latest` 与 `windows-latest`、Python `3.11` 与 `3.13` 的四矩阵自动化测试。
 
 ---
 
